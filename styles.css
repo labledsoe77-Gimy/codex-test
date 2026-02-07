@@ -1,0 +1,82 @@
+:root {
+  color-scheme: light;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at top, #fff2f2, #ffe4e4 45%, #ffd6d6 100%);
+  color: #2a0909;
+}
+
+.hero {
+  text-align: center;
+  padding: 2rem 1.5rem 3rem;
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin-bottom: 0.5rem;
+}
+
+.hero p {
+  margin: 0 auto 2.5rem;
+  max-width: 32rem;
+  font-size: 1.1rem;
+}
+
+.bounce-stage {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+}
+
+.red-bounce {
+  position: absolute;
+  left: 50%;
+  width: 120px;
+  height: 120px;
+  margin-left: -60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ff8f8f, #ff1b1b 55%, #b30000 100%);
+  animation: bounce 1.8s ease-in-out infinite;
+  box-shadow: 0 20px 40px rgba(128, 0, 0, 0.25);
+}
+
+.shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  width: 120px;
+  height: 30px;
+  margin-left: -60px;
+  background: radial-gradient(circle, rgba(80, 0, 0, 0.4), rgba(80, 0, 0, 0) 70%);
+  animation: shadow 1.8s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translate(-50%, 0) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -110px) scale(0.95);
+  }
+}
+
+@keyframes shadow {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(0.6);
+    opacity: 0.2;
+  }
+}
