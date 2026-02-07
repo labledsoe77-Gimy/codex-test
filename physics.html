@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Physics Playground</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="physics-body">
+    <header class="physics-header">
+      <div>
+        <h1>Physics Playground</h1>
+        <p>Adjust gravity, launch speed, and angle to explore projectile motion.</p>
+      </div>
+      <a class="back-link" href="index.html">Back to login</a>
+    </header>
+
+    <main class="physics-grid">
+      <section class="panel">
+        <h2>Controls</h2>
+        <label class="control">
+          <span>Gravity (m/s²)</span>
+          <input type="range" id="gravity" min="1" max="20" value="9.8" step="0.1" />
+          <strong id="gravityValue">9.8</strong>
+        </label>
+        <label class="control">
+          <span>Launch speed (m/s)</span>
+          <input type="range" id="speed" min="5" max="40" value="25" step="0.5" />
+          <strong id="speedValue">25</strong>
+        </label>
+        <label class="control">
+          <span>Angle (degrees)</span>
+          <input type="range" id="angle" min="10" max="80" value="45" step="1" />
+          <strong id="angleValue">45</strong>
+        </label>
+        <button class="launch" id="launch">Launch</button>
+        <div class="readout" id="readout">
+          <div><span>Flight time</span> <strong id="timeValue">0.00s</strong></div>
+          <div><span>Range</span> <strong id="rangeValue">0.0m</strong></div>
+          <div><span>Max height</span> <strong id="heightValue">0.0m</strong></div>
+        </div>
+      </section>
+
+      <section class="panel canvas-panel">
+        <canvas id="simCanvas" width="640" height="360" aria-label="Projectile simulation canvas"></canvas>
+      </section>
+    </main>
+
+    <script>
+      const gravityInput = document.getElementById("gravity");
+      const speedInput = document.getElementById("speed");
+      const angleInput = document.getElementById("angle");
+      const gravityValue = document.getElementById("gravityValue");
+      const speedValue = document.getElementById("speedValue");
+      const angleValue = document.getElementById("angleValue");
+      const timeValue = document.getElementById("timeValue");
+      const rangeValue = document.getElementById("rangeValue");
+      const heightValue = document.getElementById("heightValue");
+      const canvas = document.getElementById("simCanvas");
+      const ctx = canvas.getContext("2d");
+      const launchButton = document.getElementById("launch");
+
+      const state = {
+        gravity: parseFloat(gravityInput.value),
+        speed: parseFloat(speedInput.value),
+        angle: parseFloat(angleInput.value),
+        time: 0,
+        maxHeight: 0,
+        range: 0,
+        points: [],
+      };
+
+      const updateReadout = () => {
+        timeValue.textContent = `${state.time.toFixed(2)}s`;
+        rangeValue.textContent = `${state.range.toFixed(1)}m`;
+        heightValue.textContent = `${state.maxHeight.toFixed(1)}m`;
+      };
+
+      const updateValues = () => {
+        state.gravity = parseFloat(gravityInput.value);
+        state.speed = parseFloat(speedInput.value);
+        state.angle = parseFloat(angleInput.value);
+        gravityValue.textContent = state.gravity.toFixed(1);
+        speedValue.textContent = state.speed.toFixed(1);
+        angleValue.textContent = state.angle.toFixed(0);
+      };
+
+      const calculateTrajectory = () => {
+        const angleRad = (state.angle * Math.PI) / 180;
+        const velocityX = state.speed * Math.cos(angleRad);
+        const velocityY = state.speed * Math.sin(angleRad);
+        state.time = (2 * velocityY) / state.gravity;
+        state.maxHeight = (velocityY * velocityY) / (2 * state.gravity);
+        state.range = velocityX * state.time;
+
+        const steps = 80;
+        state.points = Array.from({ length: steps }, (_, index) => {
+          const t = (state.time * index) / (steps - 1);
+          const x = velocityX * t;
+          const y = velocityY * t - 0.5 * state.gravity * t * t;
+          return { x, y };
+        });
+      };
+
+      const draw = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#0b0b0f";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = "#253055";
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 6; i += 1) {
+          const y = canvas.height - (i * canvas.height) / 6;
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(canvas.width, y);
+          ctx.stroke();
+        }
+
+        const padding = 40;
+        const maxX = Math.max(state.range, 1);
+        const maxY = Math.max(state.maxHeight, 1);
+
+        ctx.strokeStyle = "#ff6a6a";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        state.points.forEach((point, index) => {
+          const scaledX = padding + (point.x / maxX) * (canvas.width - padding * 2);
+          const scaledY = canvas.height - padding - (point.y / maxY) * (canvas.height - padding * 2);
+          if (index === 0) {
+            ctx.moveTo(scaledX, scaledY);
+          } else {
+            ctx.lineTo(scaledX, scaledY);
+          }
+        });
+        ctx.stroke();
+
+        const lastPoint = state.points[state.points.length - 1];
+        const lastX = padding + (lastPoint.x / maxX) * (canvas.width - padding * 2);
+        const lastY = canvas.height - padding - (lastPoint.y / maxY) * (canvas.height - padding * 2);
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(lastX, lastY, 6, 0, Math.PI * 2);
+        ctx.fill();
+      };
+
+      const simulate = () => {
+        updateValues();
+        calculateTrajectory();
+        updateReadout();
+        draw();
+      };
+
+      gravityInput.addEventListener("input", simulate);
+      speedInput.addEventListener("input", simulate);
+      angleInput.addEventListener("input", simulate);
+      launchButton.addEventListener("click", simulate);
+
+      simulate();
+    </script>
+  </body>
+</html>
